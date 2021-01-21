@@ -300,9 +300,9 @@ func putCustomer(w http.ResponseWriter, r *http.Request) {
 				data = append(data, c.Addr.StreetName)
 			}
 			query = query[:len(query)-1]
-			query += "where CusID = ? and ID = ?"
+			query += "where CusID = ? "
 			data = append(data, id)
-			data = append(data, c.Addr.ID)
+			//data = append(data, c.Addr.ID)
 			_, err = db.Exec(query, data...)
 
 		}
