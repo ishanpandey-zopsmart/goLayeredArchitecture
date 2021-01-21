@@ -270,50 +270,46 @@ func putCustomer(w http.ResponseWriter, r *http.Request) {
 	body, _ := ioutil.ReadAll(r.Body)
 	var c customer
 	err := json.Unmarshal(body, &c)
-	//fmt.Println(c)
 	if err != nil {
-		fmt.Println("in err ")
-		log.Fatal(err)
+		w.WriteHeader(http.StatusMethodNotAllowed)
 	}
-	if c.DOB == "" {
-
-		//fmt.Println(c)
+	if len(c.DOB) == 0 {
 		param := mux.Vars(r)
 		id := param["id"]
 		if c.Name != "" {
 			_, err := db.Exec("update Customer set Name=? where ID=?", c.Name, id)
 			if err != nil {
-				panic(err.Error())
-				json.NewEncoder(w).Encode(customer{})
+				w.WriteHeader(http.StatusBadRequest)
 			}
 		}
-		var data []interface{}
-		query := "update Address set "
-		if c.Addr.City != "" {
-			query += "City = ? ,"
-			data = append(data, c.Addr.City)
-		}
-		if c.Addr.State != "" {
-			query += "State = ? ,"
-			data = append(data, c.Addr.State)
-		}
-		if c.Addr.StreetName != "" {
-			query += "StreetName = ? ,"
-			data = append(data, c.Addr.StreetName)
-		}
-		query = query[:len(query)-1]
-		query += "where CusID = ? and ID = ?"
-		data = append(data, id)
-		data = append(data, c.Addr.ID)
-		_, err = db.Exec(query, data...)
 
-		//if err != nil {
-		// log.Fatal(err)
-		//}
+		test := address{}
+		if c.Addr != test {
+			var data []interface{}
+			query := "update Address set "
+			if c.Addr.City != "" {
+				query += "City = ? ,"
+				data = append(data, c.Addr.City)
+			}
+			if c.Addr.State != "" {
+				query += "State = ? ,"
+				data = append(data, c.Addr.State)
+			}
+			if c.Addr.StreetName != "" {
+				query += "StreetName = ? ,"
+				data = append(data, c.Addr.StreetName)
+			}
+			query = query[:len(query)-1]
+			query += "where CusID = ? and ID = ?"
+			data = append(data, id)
+			data = append(data, c.Addr.ID)
+			_, err = db.Exec(query, data...)
+
+		}
 		json.NewEncoder(w).Encode(c)
+
 	} else {
 		w.WriteHeader(http.StatusBadRequest)
-		json.NewEncoder(w).Encode("DOB Can't me updated")
 	}
 }
 
